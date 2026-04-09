@@ -3,24 +3,27 @@
 namespace LBHurtado\Cash\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use LBHurtado\Cash\Tests\Models\User;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->loginTestUser(); // Log in a test user for all tests
+
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'LBHurtado\\Contact\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'LBHurtado\\Cash\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
 
-        // Load configuration files
         $this->loadConfig();
+        $this->loginTestUser();
     }
 
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
             \LBHurtado\Cash\CashServiceProvider::class,
@@ -29,54 +32,47 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function defineEnvironment($app): void
     {
-        config()->set('database.default', 'testing');
-        config()->set('data.validation_strategy', 'always');
-        config()->set('data.max_transformation_depth', 6);
-        config()->set('data.throw_when_max_transformation_depth_reached', 6);
-        config()->set('data.normalizers', [
+        $app['config']->set('database.default', 'testing');
+
+        $app['config']->set('data.validation_strategy', 'always');
+        $app['config']->set('data.max_transformation_depth', 6);
+        $app['config']->set('data.throw_when_max_transformation_depth_reached', 6);
+        $app['config']->set('data.normalizers', [
             \Spatie\LaravelData\Normalizers\ModelNormalizer::class,
-            // Spatie\LaravelData\Normalizers\FormRequestNormalizer::class,
             \Spatie\LaravelData\Normalizers\ArrayableNormalizer::class,
             \Spatie\LaravelData\Normalizers\ObjectNormalizer::class,
             \Spatie\LaravelData\Normalizers\ArrayNormalizer::class,
             \Spatie\LaravelData\Normalizers\JsonNormalizer::class,
         ]);
-        config()->set('model-status.status_model', \Spatie\ModelStatus\Status::class);
 
-        // Optional: Set web guard as the default
+        $app['config']->set('model-status.status_model', \Spatie\ModelStatus\Status::class);
         $app['config']->set('auth.defaults.guard', 'web');
-
-        // Run the migration from the local package
-        $userMigration = include __DIR__.'/../database/migrations/test/0001_01_01_000000_create_users_table.php';
-        $userMigration->up();
-        $statusMigration = include __DIR__.'/../database/migrations/test/2024_08_03_202500_create_statuses_table.php';
-        $statusMigration->up();
-        $tagMigration = include __DIR__.'/../database/migrations/test/2024_08_04_202500_create_tag_tables.php';
-        $tagMigration->up();
     }
 
-    // Define a reusable method for logging in a user
-    protected function loginTestUser()
+    protected function defineDatabaseMigrations(): void
     {
-        $user = new User([
-            'id' => 1, // Unique ID for the user
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
-        $user->save();
-        $this->actingAs($user); // Simulate authentication as this user
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 
-    /**
-     * Load the package configuration files.
-     */
-    protected function loadConfig()
+    protected function loginTestUser(): void
+    {
+        $user = User::query()->firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => 'password',
+            ]
+        );
+
+        $this->actingAs($user, 'web');
+    }
+
+    protected function loadConfig(): void
     {
         $this->app['config']->set(
-            'model-channel',
+            'cash',
             require __DIR__.'/../config/cash.php'
         );
     }
