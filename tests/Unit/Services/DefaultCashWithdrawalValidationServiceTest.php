@@ -67,6 +67,13 @@ function fakeWithdrawableInstrument(array $overrides = []): WithdrawableInstrume
         {
             return $this->overrides['id'] ?? 1;
         }
+
+        public function getOriginalClaimantId(): string|int|null
+        {
+            return array_key_exists('originalClaimantId', $this->overrides)
+                ? $this->overrides['originalClaimantId']
+                : null;
+        }
     };
 }
 

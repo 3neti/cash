@@ -28,4 +28,6 @@ interface WithdrawableInstrumentContract
     public function getInstrumentState(): string;
 
     public function getInstrumentId(): string|int|null;
+
+    public function getOriginalClaimantId(): string|int|null;
 }
