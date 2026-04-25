@@ -9,12 +9,14 @@ function fakeWithdrawableInstrumentForAmountBounds(
     bool $divisible = true,
     ?string $sliceMode = 'open',
     float $remainingBalance = 100.00,
+    ?float $minWithdrawal = null,
 ): WithdrawableInstrumentContract {
-    return new class($divisible, $sliceMode, $remainingBalance) implements WithdrawableInstrumentContract {
+    return new class($divisible, $sliceMode, $remainingBalance, $minWithdrawal) implements WithdrawableInstrumentContract {
         public function __construct(
             protected bool $divisible,
             protected ?string $sliceMode,
             protected float $remainingBalance,
+            protected ?float $minWithdrawal,
         ) {}
 
         public function isWithdrawable(): bool { return true; }
@@ -37,7 +39,7 @@ function fakeWithdrawableInstrumentForAmountBounds(
 
         public function getSliceAmount(): ?float { return null; }
 
-        public function getMinWithdrawal(): ?float { return null; }
+        public function getMinWithdrawal(): ?float { return $this->minWithdrawal; }
 
         public function getInstrumentId(): string|int { return 'test-instrument'; }
 
@@ -95,3 +97,13 @@ it('ignores amount bounds when instrument is not open-slice', function () {
 
     expect(true)->toBeTrue();
 });
+
+it('uses instrument minimum withdrawal when explicit minimum is not provided', function () {
+    $instrument = fakeWithdrawableInstrumentForAmountBounds(
+        remainingBalance: 100.00,
+        minWithdrawal: 25.00,
+    );
+
+    (new DefaultCashWithdrawalAmountBoundsService)
+        ->assertWithinBounds($instrument, 10.00);
+})->throws(InvalidArgumentException::class, 'Withdrawal amount must be at least 25.');

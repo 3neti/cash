@@ -33,6 +33,8 @@ class DefaultCashWithdrawalAmountBoundsService implements CashWithdrawalAmountBo
             throw new InvalidArgumentException('Withdrawal amount must be greater than zero.');
         }
 
+        $minimumAmount ??= $instrument->getMinWithdrawal();
+
         if ($minimumAmount !== null && $amount < $minimumAmount) {
             throw new InvalidArgumentException("Withdrawal amount must be at least {$minimumAmount}.");
         }
