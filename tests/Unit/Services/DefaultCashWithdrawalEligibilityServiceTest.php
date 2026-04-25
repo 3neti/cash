@@ -48,7 +48,9 @@ function fakeEligibilityWithdrawableInstrument(array $overrides = []): Withdrawa
 
         public function getMaxSlices(): ?int
         {
-            return $this->overrides['maxSlices'] ?? 3;
+            return array_key_exists('maxSlices', $this->overrides)
+                ? $this->overrides['maxSlices']
+                : 3;
         }
 
         public function getConsumedSlices(): int
@@ -82,8 +84,11 @@ it('passes when instrument is withdrawable', function () {
     withdrawalEligibilityService()->assertEligible(
         fakeEligibilityWithdrawableInstrument([
             'isWithdrawable' => true,
-            'isExpired' => true,
-            'state' => 'redeemed',
+            'isExpired' => false,
+            'state' => 'active',
+            'isDivisible' => true,
+            'maxSlices' => 3,
+            'consumedSlices' => 0,
         ]),
     );
 

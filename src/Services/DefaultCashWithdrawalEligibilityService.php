@@ -15,5 +15,21 @@ class DefaultCashWithdrawalEligibilityService implements CashWithdrawalEligibili
         if (! $instrument->isWithdrawable()) {
             throw new RuntimeException('This voucher is not withdrawable.');
         }
+
+        if ($instrument->isExpired()) {
+            throw new RuntimeException('This voucher has expired.');
+        }
+
+        if ($instrument->getInstrumentState() !== 'active') {
+            throw new RuntimeException('This voucher is not withdrawable.');
+        }
+
+        if (
+            $instrument->isDivisible()
+            && $instrument->getMaxSlices() !== null
+            && $instrument->getConsumedSlices() >= $instrument->getMaxSlices()
+        ) {
+            throw new RuntimeException('This voucher has no remaining slices.');
+        }
     }
 }
