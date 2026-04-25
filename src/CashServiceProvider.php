@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use LBHurtado\Cash\Contracts\CashClaimantAuthorizationContract;
 use LBHurtado\Cash\Contracts\CashWithdrawalAmountBoundsContract;
 use LBHurtado\Cash\Contracts\CashWithdrawalAmountResolverContract;
+use LBHurtado\Cash\Contracts\CashWithdrawalAuthorizationPolicyContract;
 use LBHurtado\Cash\Contracts\CashWithdrawalEligibilityContract;
 use LBHurtado\Cash\Contracts\CashWithdrawalIntervalPolicyContract;
 use LBHurtado\Cash\Contracts\CashWithdrawalValidationContract;
@@ -13,6 +14,7 @@ use LBHurtado\Cash\Contracts\WithdrawalIntervalEnforcerContract;
 use LBHurtado\Cash\Services\DefaultCashClaimantAuthorizationService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalAmountBoundsService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalAmountResolverService;
+use LBHurtado\Cash\Services\DefaultCashWithdrawalAuthorizationPolicyService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalEligibilityService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalIntervalPolicyService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalValidationService;
@@ -55,6 +57,11 @@ class CashServiceProvider extends ServiceProvider
         $this->app->bind(
             CashWithdrawalIntervalPolicyContract::class,
             DefaultCashWithdrawalIntervalPolicyService::class,
+        );
+
+        $this->app->bind(
+            CashWithdrawalAuthorizationPolicyContract::class,
+            DefaultCashWithdrawalAuthorizationPolicyService::class,
         );
 
         $this->mergeConfigFrom(
