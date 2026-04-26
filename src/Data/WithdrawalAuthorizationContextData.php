@@ -13,6 +13,7 @@ class WithdrawalAuthorizationContextData extends Data
         public array $payload = [],
         public ?string $claimantId = null,
         public ?string $vendorId = null,
+        public ?string $vendorAlias = null,
         public ?float $approvalThreshold = null,
         public bool $approved = false,
     ) {}

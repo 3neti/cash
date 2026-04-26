@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use LBHurtado\Cash\Contracts\WithdrawableInstrumentContract;
+use LBHurtado\Cash\Data\WithdrawalAuthorizationContextData;
+use LBHurtado\Cash\Exceptions\WithdrawalApprovalRequired;
+use LBHurtado\Cash\Services\DefaultCashWithdrawalAuthorizationPolicyService;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalValidationService;
 use LBHurtado\Cash\Services\NullWithdrawalIntervalEnforcer;
 
@@ -176,3 +179,66 @@ it('calls the interval enforcer for valid open-slice instruments', function () {
 
     expect($called)->toBeTrue();
 });
+
+it('allows withdrawal for trusted vendor alias within mandate limit', function () {
+    (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
+        fakeWithdrawableInstrument(),
+        new WithdrawalAuthorizationContextData(
+            amount: 300.00,
+            payload: [
+                'cash' => [
+                    'mandates' => [
+                        [
+                            'alias' => 'MERALCO',
+                            'max_amount' => 1000.00,
+                        ],
+                    ],
+                ],
+            ],
+            vendorAlias: 'MERALCO',
+        ),
+    );
+
+    expect(true)->toBeTrue();
+});
+
+it('requires approval when trusted vendor alias exceeds mandate limit', function () {
+    (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
+        fakeWithdrawableInstrument(),
+        new WithdrawalAuthorizationContextData(
+            amount: 1500.00,
+            payload: [
+                'cash' => [
+                    'mandates' => [
+                        [
+                            'alias' => 'MERALCO',
+                            'max_amount' => 1000.00,
+                        ],
+                    ],
+                ],
+            ],
+            vendorAlias: 'MERALCO',
+        ),
+    );
+})->throws(WithdrawalApprovalRequired::class, 'Withdrawal approval is required for amounts above 1000.');
+
+it('falls back to threshold policy when vendor alias is not mandated', function () {
+    (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
+        fakeWithdrawableInstrument(),
+        new WithdrawalAuthorizationContextData(
+            amount: 1500.00,
+            payload: [
+                'cash' => [
+                    'mandates' => [
+                        [
+                            'alias' => 'MERALCO',
+                            'max_amount' => 1000.00,
+                        ],
+                    ],
+                ],
+            ],
+            vendorAlias: 'UNKNOWN',
+            approvalThreshold: 1000.00,
+        ),
+    );
+})->throws(WithdrawalApprovalRequired::class, 'Withdrawal approval is required for amounts above 1000.');
