@@ -7,25 +7,6 @@ use LBHurtado\Cash\Data\WithdrawalAuthorizationContextData;
 use LBHurtado\Cash\Exceptions\WithdrawalApprovalRequired;
 use LBHurtado\Cash\Services\DefaultCashWithdrawalAuthorizationPolicyService;
 
-function fakeWithdrawableInstrumentForAuthorization(): WithdrawableInstrumentContract
-{
-    return new class implements WithdrawableInstrumentContract {
-        public function isWithdrawable(): bool { return true; }
-        public function isExpired(): bool { return false; }
-        public function getInstrumentState(): string { return 'active'; }
-        public function isDivisible(): bool { return true; }
-        public function getSliceMode(): ?string { return 'open'; }
-        public function getRemainingBalance(): float { return 1000.00; }
-        public function getRemainingSlices(): ?int { return 3; }
-        public function getMaxSlices(): ?int { return 3; }
-        public function getConsumedSlices(): int { return 0; }
-        public function getSliceAmount(): ?float { return null; }
-        public function getMinWithdrawal(): ?float { return null; }
-        public function getInstrumentId(): string|int { return 'test-instrument'; }
-        public function getOriginalClaimantId(): string|int|null { return null; }
-    };
-}
-
 it('allows withdrawal when no approval threshold is configured', function () {
     (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
         fakeWithdrawableInstrumentForAuthorization(),
@@ -73,7 +54,7 @@ it('requires approval when withdrawal exceeds threshold and is not approved', fu
 
 it('returns early when vendor mandate authorizes withdrawal', function () {
     (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
-        fakeWithdrawableInstrument(),
+        fakeWithdrawableInstrumentForAuthorization(),
         new WithdrawalAuthorizationContextData(
             amount: 300.00,
             payload: [

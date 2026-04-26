@@ -11,6 +11,7 @@
 |
 */
 
+use LBHurtado\Cash\Contracts\WithdrawableInstrumentContract;
 use LBHurtado\Cash\Tests\TestCase;
 
 pest()->extend(TestCase::class)
@@ -46,4 +47,23 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function fakeWithdrawableInstrumentForAuthorization(): WithdrawableInstrumentContract
+{
+    return new class implements WithdrawableInstrumentContract {
+        public function isWithdrawable(): bool { return true; }
+        public function isExpired(): bool { return false; }
+        public function getInstrumentState(): string { return 'active'; }
+        public function isDivisible(): bool { return true; }
+        public function getSliceMode(): ?string { return 'open'; }
+        public function getRemainingBalance(): float { return 1000.00; }
+        public function getRemainingSlices(): ?int { return 3; }
+        public function getMaxSlices(): ?int { return 3; }
+        public function getConsumedSlices(): int { return 0; }
+        public function getSliceAmount(): ?float { return null; }
+        public function getMinWithdrawal(): ?float { return null; }
+        public function getInstrumentId(): string|int { return 'test-instrument'; }
+        public function getOriginalClaimantId(): string|int|null { return null; }
+    };
 }
