@@ -29,9 +29,7 @@ class DefaultCashWithdrawalAuthorizationPolicyService implements CashWithdrawalA
         }
 
         if ($decision->status === 'approval_required') {
-            throw new WithdrawalApprovalRequired(
-                $decision->reason ?? 'Withdrawal approval is required.'
-            );
+            throw WithdrawalApprovalRequired::fromDecision($decision);
         }
     }
 }

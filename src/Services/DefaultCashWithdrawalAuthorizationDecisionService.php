@@ -9,6 +9,7 @@ use LBHurtado\Cash\Contracts\CashWithdrawalAuthorizationDecisionContract;
 use LBHurtado\Cash\Contracts\WithdrawableInstrumentContract;
 use LBHurtado\Cash\Data\WithdrawalAuthorizationContextData;
 use LBHurtado\Cash\Data\WithdrawalAuthorizationDecisionData;
+use LBHurtado\Cash\Enums\WithdrawalApprovalRequirement;
 use LBHurtado\Cash\Exceptions\WithdrawalApprovalRequired;
 
 class DefaultCashWithdrawalAuthorizationDecisionService implements CashWithdrawalAuthorizationDecisionContract
@@ -32,7 +33,7 @@ class DefaultCashWithdrawalAuthorizationDecisionService implements CashWithdrawa
         } catch (WithdrawalApprovalRequired $e) {
             return WithdrawalAuthorizationDecisionData::approvalRequired(
                 reason: $e->getMessage(),
-                requirements: ['approval'],
+                requirements: [WithdrawalApprovalRequirement::APPROVAL->value],
                 meta: [
                     'source' => 'vendor_mandate',
                 ],
@@ -59,7 +60,7 @@ class DefaultCashWithdrawalAuthorizationDecisionService implements CashWithdrawa
 
         return WithdrawalAuthorizationDecisionData::approvalRequired(
             reason: "Withdrawal approval is required for amounts above {$context->approvalThreshold}.",
-            requirements: ['approval'],
+            requirements: [WithdrawalApprovalRequirement::APPROVAL->value],
             meta: [
                 'source' => 'threshold',
                 'threshold' => $context->approvalThreshold,

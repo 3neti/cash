@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LBHurtado\Cash\Data;
 
+use LBHurtado\Cash\Enums\WithdrawalApprovalRequirement;
 use Spatie\LaravelData\Data;
 
 class WithdrawalAuthorizationDecisionData extends Data
@@ -25,8 +26,11 @@ class WithdrawalAuthorizationDecisionData extends Data
         );
     }
 
-    public static function approvalRequired(string $reason, array $requirements = [], array $meta = []): self
-    {
+    public static function approvalRequired(
+        string $reason,
+        array $requirements = [WithdrawalApprovalRequirement::APPROVAL->value],
+        array $meta = [],
+    ): self {
         return new self(
             allowed: false,
             status: 'approval_required',
