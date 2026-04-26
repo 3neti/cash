@@ -70,3 +70,26 @@ it('requires approval when withdrawal exceeds threshold and is not approved', fu
         ),
     );
 })->throws(WithdrawalApprovalRequired::class, 'Withdrawal approval is required for amounts above 1000.');
+
+it('returns early when vendor mandate authorizes withdrawal', function () {
+    (new DefaultCashWithdrawalAuthorizationPolicyService)->authorize(
+        fakeWithdrawableInstrument(),
+        new WithdrawalAuthorizationContextData(
+            amount: 300.00,
+            payload: [
+                'cash' => [
+                    'mandates' => [
+                        [
+                            'alias' => 'MERALCO',
+                            'max_amount' => 1000.00,
+                        ],
+                    ],
+                ],
+            ],
+            vendorAlias: 'MERALCO',
+            approvalThreshold: 100.00,
+        ),
+    );
+
+    expect(true)->toBeTrue();
+});
