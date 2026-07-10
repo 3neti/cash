@@ -109,9 +109,14 @@ class Cash extends Model implements ProductInterface
 
                 return $value instanceof Money
                     ? $value->getMinorAmount()->toInt()  // Extract minor units if already Money
-                    : Money::of($value, $currency)->getMinorAmount()->toInt(); // Convert before storing
+                    : Money::of($this->normalizeAmountForMoney($value), $currency)->getMinorAmount()->toInt(); // Convert before storing
             }
         );
+    }
+
+    protected function normalizeAmountForMoney(mixed $value): mixed
+    {
+        return is_float($value) ? (string) $value : $value;
     }
 
     /** @deprecated */
@@ -134,7 +139,7 @@ class Cash extends Model implements ProductInterface
         $currency = $this->currency ?? Number::defaultCurrency();
         $this->amount = $value instanceof Money
             ? $value
-            : Money::of($value, $currency);
+            : Money::of($this->normalizeAmountForMoney($value), $currency);
     }
 
     /**
