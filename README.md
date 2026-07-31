@@ -12,6 +12,16 @@ This package is designed as a **supporting domain layer** for the x-change ecosy
 
 ---
 
+## Supported platforms
+
+- PHP 8.3 and 8.4
+- Laravel 12 and 13
+- `3neti/wallet` 1.x and 2.x
+
+Laravel 12 and Laravel 13 are tested as separate compatibility lanes.
+
+---
+
 ## ✨ Core Concept
 
 `Cash` is a **value container**:
@@ -31,7 +41,7 @@ It is a **portable monetary unit** used across workflows.
 ## 📦 Installation
 
 ```bash
-composer require 3neti/cash
+composer require 3neti/cash:^1.3
 ```
 
 ---
@@ -259,6 +269,28 @@ In the **x-change ecosystem**:
 - Expiration is built-in
 - Metadata is flexible
 - Secrets are hashed
+
+---
+
+## Withdrawal authorization
+
+Cash withdrawal policy is exposed through container-resolved contracts for:
+
+- amount bounds;
+- withdrawal intervals;
+- claimant authorization;
+- vendor mandates;
+- approval policy; and
+- typed authorization decisions.
+
+The default decision service reports whether a withdrawal is allowed or
+requires an independent approval. It does not dispatch a provider transfer or
+manufacture approval evidence. The integrating settlement system remains
+responsible for authenticating the officer, persisting authorization evidence,
+and invoking execution.
+
+Resolve these services through Laravel's container so applications may replace
+policy implementations without changing Cash models.
 
 ---
 
